@@ -1,9 +1,11 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:background_downloader/background_downloader.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:not_lame_downloader/helpers/get_and_save_file_extension.dart';
 
 import '../../helpers/callbacks/notification_tap_call_back.dart';
 
@@ -12,8 +14,10 @@ part 'download_state.dart';
 class DownloadCubit extends Cubit<DownloadState> {
   DownloadCubit() : super(DownloadInitial());
   List<DownloadTask>tasks =[];
+
   static get(BuildContext context) => BlocProvider.of<DownloadCubit>(context);
-  initialize(){
+  initialize() async {
+
     // configure notification for all tasks
     FileDownloader().configureNotification(
         running: const TaskNotification('Downloading', 'file: {filename}'),
@@ -31,8 +35,7 @@ class DownloadCubit extends Cubit<DownloadState> {
 
     // Registering a callback and configure notifications
     FileDownloader()
-        .registerCallbacks(
-        taskNotificationTapCallback: myNotificationTapCallback)
+
         .configureNotificationForGroup(FileDownloader.defaultGroup,
         // For the main download button
         // which uses 'enqueue' and a default group
@@ -53,12 +56,16 @@ class DownloadCubit extends Cubit<DownloadState> {
             'Download {filename}', 'Download complete'),
         tapOpensFile: true); // dog can also open directly from tap
     // Listen to updates and process
-    FileDownloader().updates.listen((update) {
+    FileDownloader().updates.listen((update) async {
       switch (update) {
         case TaskStatusUpdate _:
           for(int i=0;i<tasks.length;i++){
             if(tasks[i]==update.task){
-              tasks[i]==update.task;
+              if(update.status==TaskStatus.complete){
+                tasks.removeAt(i);update.task.filePath();
+                getAndSaveExtension(await update.task.filePath());
+              }else{
+              tasks[i]==update.task;}
               // ignore: prefer_const_constructors
               emit( DownloadTaskUpdateState(update));
               break;
@@ -112,7 +119,7 @@ emit(DownloadEnqueuedLoadingState());
         final DownloadTask task=DownloadTask(url: url,
         taskId: id,
         allowPause: true,
-          updates: Updates.statusAndProgress
+          updates: Updates.statusAndProgress,
         );
         try{
         await FileDownloader().enqueue(task);

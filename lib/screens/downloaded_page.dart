@@ -8,6 +8,7 @@ class DownloadedPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return BlocConsumer<DownloadCubit,DownloadState>(
       listener: (context,state){
         if(state is DownloadTaskUpdateState){

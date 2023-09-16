@@ -1,3 +1,4 @@
+import 'package:not_lame_downloader/cubits/downloaded_loader_cubit/downloaded_loader_cubit.dart';
 import 'package:not_lame_downloader/cubits/theme_cubit/theme_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,20 +20,33 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (BuildContext context) => DownloadCubit()..initialize()..getDownloadedFiles(),lazy: false,),
         BlocProvider(
-            create: (context) => ThemeCubit()..initialize(context), lazy: false)
+            create: (BuildContext context) =>
+                DownloadedLoaderCubit()..initializeOrUpdate(firstLoad: true),lazy: false,),
+        BlocProvider(
+          create: (BuildContext context) => DownloadCubit()
+            ..initialize()
+            ..getDownloadedFiles(),
+          lazy: false,
+        ),
+        BlocProvider(
+            create: (BuildContext context) => ThemeCubit()..initialize(context),
+            lazy: false)
       ],
       child: BlocBuilder<ThemeCubit, Brightness>(
         builder: (context, state) => CupertinoApp(
+          navigatorKey: navigatorKey,
           title: 'NotLameDownloader',
           theme: CupertinoThemeData(
-
-              barBackgroundColor: state == Brightness.light?CupertinoColors.extraLightBackgroundGray:CupertinoColors.black,
-              brightness: state, primaryColor: CupertinoColors.link),
+              barBackgroundColor: state == Brightness.light
+                  ? CupertinoColors.extraLightBackgroundGray
+                  : CupertinoColors.darkBackgroundGray,
+              brightness: state,
+              primaryColor: CupertinoColors.link),
           home: const MainPage(),
         ),
       ),
     );
   }
 }
+final GlobalKey<NavigatorState> navigatorKey=GlobalKey<NavigatorState>();

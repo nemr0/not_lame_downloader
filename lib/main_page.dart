@@ -35,7 +35,9 @@ class MainPage extends HookWidget {
             },
             child: const Icon(CupertinoIcons.add)),
       ),
-      child: const DownloadedPage(),
+      child: CupertinoTabScaffold(
+        tabBar: CupertinoTabBar(items: const [BottomNavigationBarItem(icon: Icon(CupertinoIcons.down_arrow,),label: 'Downloads'),BottomNavigationBarItem(icon: Icon(CupertinoIcons.archivebox_fill) ,label: 'Files')]),
+        tabBuilder: (context,index){return const DownloadedPage();},),
     );
   }
 }

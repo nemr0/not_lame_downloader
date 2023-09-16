@@ -1,4 +1,3 @@
-import 'package:background_downloader/background_downloader.dart';
 import 'package:not_lame_downloader/cubits/download_cubit/download_cubit.dart';
 import 'package:not_lame_downloader/helpers/extensions/context_extension.dart';
 import 'package:not_lame_downloader/helpers/overlays/toast.dart';
