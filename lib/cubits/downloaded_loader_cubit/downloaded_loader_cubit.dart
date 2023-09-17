@@ -1,11 +1,8 @@
 import 'dart:developer';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:get_storage/get_storage.dart';
-import 'package:mime/mime.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'downloaded_loader_state.dart';

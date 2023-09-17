@@ -2,20 +2,19 @@ part of 'download_cubit.dart';
 
 sealed class DownloadState extends Equatable {
   const DownloadState();
-}
 
-class DownloadInitial extends DownloadState {
   @override
   List<Object> get props => const [];
 }
+
+class DownloadInitial extends DownloadState {}
 
 class DownloadLoadingState extends DownloadState {
   @override
   List<Object> get props => const [];
 }
-class DownloadEnqueuedLoadingState extends DownloadLoadingState{
 
-}
+class DownloadEnqueuedLoadingState extends DownloadLoadingState {}
 
 class DownloadErrorState extends DownloadState {
   final String error;
@@ -36,10 +35,18 @@ class DownloadTaskEnqueuedState extends DownloadState {
 }
 
 class DownloadTaskUpdateState extends DownloadState {
-  final TaskUpdate update;
+  final TaskStatusUpdate? statusUpdate;
+  final TaskProgressUpdate? progressUpdate;
 
-  const DownloadTaskUpdateState(this.update);
+  const DownloadTaskUpdateState({this.statusUpdate, this.progressUpdate});
+
+  DownloadTaskUpdateState copyWith(
+          {TaskStatusUpdate? statusUpdate,
+          TaskProgressUpdate? progressUpdate}) =>
+      DownloadTaskUpdateState(statusUpdate:statusUpdate ?? this.statusUpdate,
+          progressUpdate:progressUpdate ?? this.progressUpdate);
 
   @override
-  List<Object> get props => [update];
+  List<Object> get props =>
+      [statusUpdate.toString(), progressUpdate.toString()];
 }

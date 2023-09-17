@@ -33,9 +33,9 @@ class AddDownloadPage extends HookWidget {
         didPaste.value = true;
       }
     }
-
+final double height=context.height()*.6+MediaQuery.of(context).viewInsets.bottom;
     return SizedBox(
-      height: context.height()*.6,
+      height: height,
       child: Dismissible(
         key: UniqueKey(),
         direction: DismissDirection.down,
@@ -43,8 +43,8 @@ class AddDownloadPage extends HookWidget {
           Navigator.pop(context);
         },
         child: CupertinoPageScaffold(
+          resizeToAvoidBottomInset: true,
           navigationBar: CupertinoNavigationBar(
-            // backgroundColor: CupertinoColors.black,
             leading: CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: const Icon(CupertinoIcons.chevron_down),
@@ -107,32 +107,24 @@ class AddDownloadPage extends HookWidget {
                     }
                   },
                   builder: (context, state) {
-                    return Column(
-                      children: [
-                        // CupertinoButton(child: Text('Delete Old Tasks'),color: CupertinoColors.destructiveRed, onPressed: (){
-                        //   FileDownloader().database.deleteAllRecords();
-                        //   DownloadCubit.get(context).tasks.clear();
-                        // }),
-                        CupertinoButton(
-                            padding: const EdgeInsets.all(12),
-                            color: CupertinoColors.activeBlue,
-                            child: state is DownloadEnqueuedLoadingState
-                                ? const CupertinoActivityIndicator()
-                                : const Text(
-                                    'Add Download',
-                                    style: TextStyle(
-                                        color: CupertinoColors.white),
-                                  ),
-                            onPressed: () {
-                              error.value = validateLink(controller.text);
-                              if (error.value == null) {
-                                //add download
-                                DownloadCubit.get(context)
-                                    .addDownloadTask(controller.text);
-                              } else {}
-                            }),
-                      ],
-                    );
+                    return CupertinoButton(
+                        padding: const EdgeInsets.all(12),
+                        color: CupertinoColors.activeBlue,
+                        child: state is DownloadEnqueuedLoadingState
+                            ? const CupertinoActivityIndicator()
+                            : const Text(
+                                'Add Download',
+                                style: TextStyle(
+                                    color: CupertinoColors.white),
+                              ),
+                        onPressed: () {
+                          error.value = validateLink(controller.text);
+                          if (error.value == null) {
+                            //add download
+                            DownloadCubit.get(context)
+                                .addDownloadTask(controller.text);
+                          } else {}
+                        });
                   },
                 ),
               ),
