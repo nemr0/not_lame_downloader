@@ -1,8 +1,8 @@
-import 'package:not_lame_downloader/cubits/downloaded_loader_cubit/downloaded_loader_cubit.dart';
-import 'package:not_lame_downloader/cubits/theme_cubit/theme_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:not_lame_downloader/cubits/downloaded_loader_cubit/downloaded_loader_cubit.dart';
+import 'package:not_lame_downloader/cubits/theme_cubit/theme_cubit.dart';
 
 import 'cubits/download_cubit/download_cubit.dart';
 import 'main_page.dart';
@@ -21,17 +21,18 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-            create: (BuildContext context) =>
-                DownloadedLoaderCubit()..initializeOrUpdate(firstLoad: true),lazy: false,),
+          create: (BuildContext context) =>
+              DownloadedLoaderCubit()..initializeOrUpdate(firstLoad: true),
+          lazy: false,
+        ),
         BlocProvider(
           create: (BuildContext context) => DownloadCubit()
             ..initialize()
             ..getDownloadedFiles(),
-          lazy: false,
         ),
         BlocProvider(
-            create: (BuildContext context) => ThemeCubit()..initialize(context),
-            lazy: false)
+          create: (BuildContext context) => ThemeCubit()..initialize(context),
+        )
       ],
       child: BlocBuilder<ThemeCubit, Brightness>(
         builder: (context, state) => CupertinoApp(
@@ -49,4 +50,5 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-final GlobalKey<NavigatorState> navigatorKey=GlobalKey<NavigatorState>();
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();

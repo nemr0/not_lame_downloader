@@ -14,6 +14,7 @@ class DownloadedLoaderCubit extends Cubit<DownloadedLoaderState> {
 
   initializeOrUpdate({bool firstLoad = false}) async {
     if (firstLoad) documentDirectory = await getApplicationDocumentsDirectory();
+    print(documentDirectory.path);
     files = documentDirectory.listSync();
 
     files.removeWhere((element) =>
@@ -24,5 +25,3 @@ class DownloadedLoaderCubit extends Cubit<DownloadedLoaderState> {
     log('DownloadCubit: documentDirectory.path:${documentDirectory.path}, files:${files.toString()}');
   }
 }
-
-

@@ -66,25 +66,30 @@ class DownloadCubit extends Cubit<DownloadState> {
                 update.task.filePath();
                 getAndSaveExtension(await update.task.filePath());
               }
-              if(state is DownloadTaskUpdateState){
-                final taskUpdateState=(state as DownloadTaskUpdateState).copyWith(statusUpdate: update);
+              if (state is DownloadTaskUpdateState) {
+                final taskUpdateState = (state as DownloadTaskUpdateState)
+                    .copyWith(statusUpdate: update);
                 emit(taskUpdateState);
-              }else{
+              } else {
                 emit(DownloadTaskUpdateState(statusUpdate: update));
               }
-            
+
               break;
             }
           }
 
         case TaskProgressUpdate _:
-          final TaskStatus? status=(state as DownloadTaskUpdateState).statusUpdate?.status;
-          if(state is DownloadTaskUpdateState&&(status!=null||status!=TaskStatus.complete)){
-            final taskUpdateState=(state as DownloadTaskUpdateState).copyWith(progressUpdate: update);
-            emit(taskUpdateState);
-          }else{
-            emit(DownloadTaskUpdateState(progressUpdate: update));
-          }
+        // final TaskStatus? status = state is DownloadTaskUpdateState
+        //     ? (state as DownloadTaskUpdateState).statusUpdate?.status
+        //     : null;
+        // if (state is DownloadTaskUpdateState &&
+        //     (status != null || status != TaskStatus.complete)) {
+        //   final taskUpdateState = (state as DownloadTaskUpdateState)
+        //       .copyWith(progressUpdate: update);
+        //   emit(taskUpdateState);
+        // } else {
+        //   emit(DownloadTaskUpdateState(progressUpdate: update));
+        // }
       }
     });
   }
@@ -111,9 +116,19 @@ class DownloadCubit extends Cubit<DownloadState> {
     });
   }
 
-  addDownloadTask(
-    String url,
-  ) async {
+  exampleDownload() async {
+    List<String> links = [
+      'https://dev.hindawi.org/comics/stories/418171512160/418171512160.zip',
+      'https://dev.hindawi.org/comics/stories/835105395106/835105395106.zip',
+      'https://dev.hindawi.org/comics/stories/874162025974/874162025974.zip',
+    ];
+
+    for (String link in links) {
+      await addDownloadTask(link, pop: false);
+    }
+  }
+
+  addDownloadTask(String url, {bool pop = true}) async {
     emit(DownloadEnqueuedLoadingState());
 
     bool taskExists = tasks.any((element) => url == element.url);
@@ -138,7 +153,7 @@ class DownloadCubit extends Cubit<DownloadState> {
 
       /// emit success;
       log('task enqueued');
-      emit(DownloadTaskEnqueuedState());
+      emit(DownloadTaskEnqueuedState(pop: pop));
     } catch (e, s) {
       log('$e\n$s');
 

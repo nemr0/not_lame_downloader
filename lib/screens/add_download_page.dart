@@ -1,10 +1,10 @@
-import 'package:not_lame_downloader/cubits/download_cubit/download_cubit.dart';
-import 'package:not_lame_downloader/helpers/extensions/context_extension.dart';
-import 'package:not_lame_downloader/helpers/overlays/toast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:not_lame_downloader/cubits/download_cubit/download_cubit.dart';
+import 'package:not_lame_downloader/helpers/extensions/context_extension.dart';
+import 'package:not_lame_downloader/helpers/overlays/toast.dart';
 
 import '../helpers/link_validator.dart';
 
@@ -16,6 +16,7 @@ class AddDownloadPage extends HookWidget {
     final controller = useTextEditingController();
     final error = useState<String?>(null);
     final didPaste = useState<bool>(false);
+
     /// Paste from [Clipboard] or Clear [controller]
     onPasteOrClear() async {
       /// Clear if did paste
@@ -33,7 +34,9 @@ class AddDownloadPage extends HookWidget {
         didPaste.value = true;
       }
     }
-final double height=context.height()*.6+MediaQuery.of(context).viewInsets.bottom;
+
+    final double height =
+        context.height() * .6 + MediaQuery.of(context).viewInsets.bottom;
     return SizedBox(
       height: height,
       child: Dismissible(
@@ -70,6 +73,11 @@ final double height=context.height()*.6+MediaQuery.of(context).viewInsets.bottom
             // ),
 
             children: [
+              CupertinoButton(
+                  child: Text('Test'),
+                  onPressed: () async {
+                    DownloadCubit.get(context).exampleDownload();
+                  }),
               CupertinoFormRow(
                   padding: const EdgeInsets.all(15),
                   error: error.value == null
@@ -100,7 +108,7 @@ final double height=context.height()*.6+MediaQuery.of(context).viewInsets.bottom
                 child: BlocConsumer<DownloadCubit, DownloadState>(
                   listener: (context, state) {
                     if (state is DownloadTaskEnqueuedState) {
-                      Navigator.pop(context);
+                      if (state.pop) Navigator.pop(context);
                     }
                     if (state is DownloadEnqueuedErrorState) {
                       showToast(context, state.error);
@@ -114,8 +122,7 @@ final double height=context.height()*.6+MediaQuery.of(context).viewInsets.bottom
                             ? const CupertinoActivityIndicator()
                             : const Text(
                                 'Add Download',
-                                style: TextStyle(
-                                    color: CupertinoColors.white),
+                                style: TextStyle(color: CupertinoColors.white),
                               ),
                         onPressed: () {
                           error.value = validateLink(controller.text);
