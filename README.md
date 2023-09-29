@@ -16,7 +16,8 @@ A Flutter app to download files in background.
 - [flutter_hooks](https://pub.dev/packages/flutter_hooks).
 - [path_provider](https://pub.dev/packages/path_provider).
 - [mime](https://pub.dev/packages/mime)
-  And all other beautiful contributions of the flutter community❤️.
+ 
+And all other beautiful contributions of the flutter community❤️.
 ## TODOS:
 ### Features:
     - Download Screen:
