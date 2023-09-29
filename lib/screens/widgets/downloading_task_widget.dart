@@ -79,7 +79,6 @@ class DownloadTaskWidget extends HookWidget {
             padding: const EdgeInsets.all(15),
             color: CupertinoTheme.of(context).barBackgroundColor.withOpacity(.7),
             onPressed: () {
-              print(task.taskId);
               showCupertinoModalPopup(
                   context: context,
                   builder: (context) => DownloadTaskDetailsModalPopup(

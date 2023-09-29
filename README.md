@@ -1,16 +1,47 @@
-# download_in_background_example
 
-A new Flutter project.
+![logo](https://raw.githubusercontent.com/nemr0/not_lame_downloader/main/assets/NotLameDownloader.svg)
+# Not Lame Downloader
 
-## Getting Started
+A Flutter app to download files in background.
 
-This project is a starting point for a Flutter application.
+## Platforms
+- Android.
+- iOS.
+- macOS.
+- Windows.
+- Linux.
+## Thanks To:
+- [flutter_bloc](https://pub.dev/packages/flutter_bloc).
+- [background_downloader](https://pub.dev/packages/background_downloader).
+- [flutter_hooks](https://pub.dev/packages/flutter_hooks).
+- [path_provider](https://pub.dev/packages/path_provider).
+- [mime](https://pub.dev/packages/mime)
+  And all other beautiful contributions of the flutter community❤️.
+## TODOS:
+### Features:
+    - Download Screen:
+        ✅ Show download tasks progress and status.
+        ✅ Resume not completed downloads.
+        ✅ Pause downloads.
+        ⚠️ Cancel download.
 
-A few resources to get you started if this is your first Flutter project:
+    - Add Download Screen:
+        ✅ Enqueue one url.
+        ✅ Show Preview of the link.
+        ⚠️ Get last redirect url.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+    - Files Screen:
+        ⚠️ Show Downloaded files.
+        ⚠️ Delete/Rename/Open/Share files.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Tested on:
+
+    ✅ Mobile.
+    ⚠️ Desktop.
+
+### Design-wise:
+
+    ⚠️ Android Design.
+    ✅ iOS Design.
+    ⚠️ macOS Design.
+    ⚠️ Windows Design.
