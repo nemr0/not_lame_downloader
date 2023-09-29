@@ -15,7 +15,7 @@ A Flutter app to download files in background.
 - [background_downloader](https://pub.dev/packages/background_downloader).
 - [flutter_hooks](https://pub.dev/packages/flutter_hooks).
 - [path_provider](https://pub.dev/packages/path_provider).
-- [mime](https://pub.dev/packages/mime)
+- [mime](https://pub.dev/packages/mime).
  
 And all other beautiful contributions of the flutter community❤️.
 ## TODOS:
