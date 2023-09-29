@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:not_lame_downloader/helpers/extensions/context_extension.dart';
 import 'package:not_lame_downloader/helpers/glass_morphism_box_decoration.dart';
 import 'package:not_lame_downloader/helpers/measure_size.dart';
@@ -43,23 +44,26 @@ class Toast extends HookWidget {
     final size=useState(Size.zero);
     final Duration delayDuration=Duration(milliseconds: duration.inMilliseconds-400);
     return Positioned(
-      bottom: MediaQuery.of(context).padding.bottom,
-      left: (context.width()*.5)-(size.value.width*.5),
-      child: MeasureSize(
-        onChange: (Size mSize)=>size.value=mSize,
+      bottom: MediaQuery.of(context).viewInsets.bottom,
+      left: (context.width*.5)-(size.value.width*.5),
+      child: Material(
+          color: Colors.transparent,
+        child: MeasureSize(
+          onChange: (Size mSize)=>size.value=mSize,
 
-        child: Container(
-          padding: const EdgeInsets.all(6),
-          height: 40,
-          decoration: glassBoxDecoration(
-            color: color.withOpacity(.7),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Center(
-            child: Text(
-              msg,
-              style: TextStyle(color: textColor),
-              textAlign: TextAlign.center,
+          child: Container(
+            padding: const EdgeInsets.all(6),
+            height: 40,
+            decoration: glassBoxDecoration(
+              color: color.withOpacity(.7),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Center(
+              child: Text(
+                msg,
+                style: TextStyle(color: textColor),
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
         ),

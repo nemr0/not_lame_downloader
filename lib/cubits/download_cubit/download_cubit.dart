@@ -4,21 +4,21 @@ import 'package:background_downloader/background_downloader.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:not_lame_downloader/helpers/get_and_save_file_extension.dart';
 
 import '../../helpers/callbacks/notification_tap_call_back.dart';
 
 part 'download_state.dart';
-
+part 'download_task_state_handler.dart';
 class DownloadCubit extends Cubit<DownloadState> {
   DownloadCubit() : super(DownloadInitial());
   List<DownloadTask> tasks = [];
-
-  static get(BuildContext context) => BlocProvider.of<DownloadCubit>(context);
+  final FileDownloader _fileDownloader= FileDownloader();
+  static DownloadCubit get(BuildContext context) => BlocProvider.of<DownloadCubit>(context);
 
   initialize() async {
+    _fileDownloader.resumeFromBackground();
     // configure notification for all tasks
-    FileDownloader()
+    _fileDownloader
         .registerCallbacks(
             taskNotificationTapCallback: myNotificationTapCallback)
         .configureNotification(
@@ -27,7 +27,7 @@ class DownloadCubit extends Cubit<DownloadState> {
                 const TaskNotification('Download finished', 'file: {filename}'),
             progressBar: true);
     //configure global
-    FileDownloader().configure(globalConfig: [
+    _fileDownloader.configure(globalConfig: [
       (Config.requestTimeout, const Duration(seconds: 100)),
     ], androidConfig: [
       (Config.useCacheDir, Config.whenAble),
@@ -36,11 +36,11 @@ class DownloadCubit extends Cubit<DownloadState> {
     ]).then((result) => debugPrint('Configuration result = $result'));
 
     // Registering a callback and configure notifications
-    FileDownloader()
+    _fileDownloader
         .configureNotificationForGroup(FileDownloader.defaultGroup,
             // For the main download button
             // which uses 'enqueue' and a default group
-            running: const TaskNotification('Download {filename}',
+            running: const TaskNotification('Downloading {filename}',
                 'File: {filename} - {progress} - speed {networkSpeed} and {timeRemaining} remaining'),
             complete: const TaskNotification(
                 'Download {filename}', 'Download complete'),
@@ -58,63 +58,36 @@ class DownloadCubit extends Cubit<DownloadState> {
             tapOpensFile: true); // dog can also open directly from tap
     // Listen to updates and process
     FileDownloader().updates.listen((update) async {
-      switch (update) {
-        case TaskStatusUpdate _:
-          for (DownloadTask task in tasks) {
-            if (task == update.task) {
-              if (update.status == TaskStatus.complete) {
-                update.task.filePath();
-                getAndSaveExtension(await update.task.filePath());
-              }
-              if (state is DownloadTaskUpdateState) {
-                final taskUpdateState = (state as DownloadTaskUpdateState)
-                    .copyWith(statusUpdate: update);
-                emit(taskUpdateState);
-              } else {
-                emit(DownloadTaskUpdateState(statusUpdate: update));
-              }
+     emit(_downloadStateUpdate( state, update));
 
-              break;
+    });
+    getDownloadedTasks();
+
+  }
+
+  Future<List<TaskRecord>> getDownloadedTasks() =>
+      _fileDownloader.database.allRecords()
+        ..then((List<TaskRecord> records) {
+
+          /// do nothing if there's no tasks in the database
+          if (records.isEmpty) return;
+
+          /// Clear List so we can use it multiple times
+          tasks.clear();
+          for (TaskRecord record in records) {
+            log('record:$record');
+            final Task task = record.task;
+            if (task is DownloadTask) {
+              tasks.add(task);
             }
           }
 
-        case TaskProgressUpdate _:
-        // final TaskStatus? status = state is DownloadTaskUpdateState
-        //     ? (state as DownloadTaskUpdateState).statusUpdate?.status
-        //     : null;
-        // if (state is DownloadTaskUpdateState &&
-        //     (status != null || status != TaskStatus.complete)) {
-        //   final taskUpdateState = (state as DownloadTaskUpdateState)
-        //       .copyWith(progressUpdate: update);
-        //   emit(taskUpdateState);
-        // } else {
-        //   emit(DownloadTaskUpdateState(progressUpdate: update));
-        // }
-      }
-    });
-  }
-
-  getDownloadedFiles() async {
-    await FileDownloader().database.allRecords().then((value) {
-      /// do nothing if there's no tasks in the database
-      if (value.isEmpty) return;
-
-      /// Clear List so we can use it multiple times
-      tasks.clear();
-      for (TaskRecord record in value) {
-        final Task task = record.task;
-        if (task is DownloadTask) {
-          tasks.add(task);
-        }
-      }
-
-      /// emit success;
-      emit(DownloadInitial());
-    }).catchError((e) {
-      /// emit error;
-      emit(DownloadErrorState(e.toString()));
-    });
-  }
+          /// emit success;
+          emit(DownloadInitial());
+        }).catchError((e) {
+          /// emit error;
+          emit(DownloadErrorState(e.toString()));
+        });
 
   exampleDownload() async {
     List<String> links = [
@@ -148,7 +121,7 @@ class DownloadCubit extends Cubit<DownloadState> {
       updates: Updates.statusAndProgress,
     );
     try {
-      await FileDownloader().enqueue(task);
+      await _fileDownloader.enqueue(task);
       tasks.add(task);
 
       /// emit success;

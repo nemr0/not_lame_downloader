@@ -31,25 +31,37 @@ class DownloadEnqueuedErrorState extends DownloadErrorState {
 
 class DownloadTaskEnqueuedState extends DownloadState {
   final bool pop;
+
   const DownloadTaskEnqueuedState({this.pop = true});
+
   @override
   List<Object> get props => [pop];
 }
 
 class DownloadTaskUpdateState extends DownloadState {
+  final List<TaskProgressStatus>? updateList;
+
+  const DownloadTaskUpdateState({ this.updateList});
+
+
+  @override
+  List<Object> get props => [updateList.toString()];
+}
+
+class TaskProgressStatus extends Equatable{
+
+  final Task task;
   final TaskStatusUpdate? statusUpdate;
   final TaskProgressUpdate? progressUpdate;
 
-  const DownloadTaskUpdateState({this.statusUpdate, this.progressUpdate});
+  const TaskProgressStatus(this.task, { this.statusUpdate, this.progressUpdate});
 
-  DownloadTaskUpdateState copyWith(
-          {TaskStatusUpdate? statusUpdate,
-          TaskProgressUpdate? progressUpdate}) =>
-      DownloadTaskUpdateState(
-          statusUpdate: statusUpdate ?? this.statusUpdate,
+  TaskProgressStatus copyWith(
+      { TaskStatusUpdate? statusUpdate, TaskProgressUpdate? progressUpdate}) =>
+      TaskProgressStatus(
+          task, statusUpdate: statusUpdate ?? this.statusUpdate,
           progressUpdate: progressUpdate ?? this.progressUpdate);
 
   @override
-  List<Object> get props =>
-      [statusUpdate.toString(), progressUpdate.toString()];
+  List<Object?> get props => [task,statusUpdate,progressUpdate];
 }

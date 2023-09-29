@@ -5,6 +5,8 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../helpers/remove_unused_files.dart';
+
 part 'downloaded_loader_state.dart';
 
 class DownloadedLoaderCubit extends Cubit<DownloadedLoaderState> {
@@ -14,14 +16,11 @@ class DownloadedLoaderCubit extends Cubit<DownloadedLoaderState> {
 
   initializeOrUpdate({bool firstLoad = false}) async {
     if (firstLoad) documentDirectory = await getApplicationDocumentsDirectory();
-    print(documentDirectory.path);
-    files = documentDirectory.listSync();
+    files = removeUnusedFilesFromDocumentDirectory(documentDirectory.listSync());
 
-    files.removeWhere((element) =>
-        element.path.split(Platform.pathSeparator).last == 'GetStorage.gs');
-    files.removeWhere((element) =>
-        element.path.split(Platform.pathSeparator).last == 'GetStorage.bak');
 
     log('DownloadCubit: documentDirectory.path:${documentDirectory.path}, files:${files.toString()}');
   }
 }
+
+

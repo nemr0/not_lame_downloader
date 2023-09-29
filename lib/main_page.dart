@@ -1,8 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:not_lame_downloader/app_assets.dart';
 import 'package:not_lame_downloader/helpers/extensions/context_extension.dart';
-import 'package:not_lame_downloader/screens/add_download_page.dart';
-import 'package:not_lame_downloader/screens/downloaded_page.dart';
+import 'package:not_lame_downloader/screens/download_task_page.dart';
+import 'package:not_lame_downloader/screens/widgets/modal_popups/add_download_modal_popup.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -16,23 +17,31 @@ class MainPage extends HookWidget {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        leading: BlocBuilder<ThemeCubit, Brightness>(
-          builder: (context, state) => CupertinoButton(
+        leading: BlocBuilder<ThemeCubit, ThemeMode>(builder: (context, state) {
+          return CupertinoButton(
             padding: EdgeInsets.zero,
-            child: Icon(state == Brightness.light
-                ? CupertinoIcons.brightness_solid
-                : CupertinoIcons.moon_fill),
-            onPressed: () => ThemeCubit.get(context).changeBrightness(
-                state == Brightness.dark ? Brightness.light : Brightness.dark),
-          ),
-        ),
+            child: Icon(state == ThemeMode.system
+                ? Icons.brightness_4
+                : state == ThemeMode.light
+                    ? CupertinoIcons.brightness_solid
+                    : CupertinoIcons.moon_fill),
+            onPressed: () {
+              final ThemeMode newThemeMode = (state == ThemeMode.system)
+                  ? ThemeMode.dark
+                  : state == ThemeMode.dark
+                      ? ThemeMode.light
+                      : ThemeMode.system;
+              ThemeCubit.get(context).changeBrightness(newThemeMode);
+            },
+          );
+        }),
         middle: const Text('NotLameDownloader'),
         trailing: CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: () {
               showCupertinoModalPopup(
                   context: context,
-                  builder: (context) => const AddDownloadPage());
+                  builder: (context) => const AddDownloadModalPopUp());
             },
             child: const Icon(CupertinoIcons.add)),
       ),
@@ -53,8 +62,8 @@ class MainPage extends HookWidget {
                 child: SvgPicture.asset(
                   AppAssets.assets_notlamedownloader_svg,
                   fit: BoxFit.contain,
-                  height: context.height()*.2,
-                  width: context.width()*.2,
+                  height: context.height * .2,
+                  width: context.width * .2,
                   theme: SvgTheme(
                       currentColor:
                           CupertinoTheme.of(context).barBackgroundColor),
@@ -63,7 +72,7 @@ class MainPage extends HookWidget {
                       BlendMode.hardLight),
                 ),
               ),
-              const DownloadedPage(),
+              const DownloadTasksPage(),
             ],
           );
         },
