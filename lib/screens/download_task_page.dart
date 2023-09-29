@@ -2,6 +2,7 @@ import 'package:background_downloader/background_downloader.dart';
 import 'package:not_lame_downloader/cubits/download_cubit/download_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:not_lame_downloader/helpers/extensions/context_extension.dart';
 import 'package:not_lame_downloader/screens/widgets/downloading_task_widget.dart';
 
 class DownloadTasksPage extends StatelessWidget {
@@ -12,7 +13,14 @@ class DownloadTasksPage extends StatelessWidget {
     return BlocBuilder<DownloadCubit, DownloadState>(builder: (context, state) {
       final List<TaskProgressStatus>? updateList=state is DownloadTaskUpdateState?(state).updateList:null;
       final List<DownloadTask> tasks=DownloadCubit.get(context).tasks;
-      return (tasks.isEmpty)
+      return
+        state is DownloadLoadingState?ListView.builder(
+          itemCount: 4,
+          physics: const NeverScrollableScrollPhysics(),
+          itemExtent: context.height/9,
+          itemBuilder: (BuildContext context, int index) =>const LoadingDownloadTaskWidget(),
+        ):
+        (tasks.isEmpty)
           ? Center(
               child: Text(
               'No Downloads is added :)',

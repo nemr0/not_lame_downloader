@@ -9,7 +9,7 @@ class ModalPopups extends StatelessWidget {
       this.heightRatio = 1});
 
   final Widget child;
-  final String title;
+  final Widget title;
 
   /// 0 - 1 of device's height, defaults to one
   final double heightRatio;
@@ -42,7 +42,7 @@ class ModalPopups extends StatelessWidget {
                     onPressed: () {
                       Navigator.pop(context);
                     }),
-                middle: Text(title),
+                middle: title,
               ),
               child: child,
             ),

@@ -16,6 +16,7 @@ class DownloadCubit extends Cubit<DownloadState> {
   static DownloadCubit get(BuildContext context) => BlocProvider.of<DownloadCubit>(context);
 
   initialize() async {
+    emit(DownloadLoadingState());
     _fileDownloader.resumeFromBackground();
     // configure notification for all tasks
     _fileDownloader
@@ -57,6 +58,7 @@ class DownloadCubit extends Cubit<DownloadState> {
                 'Download {filename}', 'Download complete'),
             tapOpensFile: true); // dog can also open directly from tap
     // Listen to updates and process
+    emit(DownloadInitial());
     FileDownloader().updates.listen((update) async {
      emit(_downloadStateUpdate( state, update));
 
@@ -65,29 +67,31 @@ class DownloadCubit extends Cubit<DownloadState> {
 
   }
 
-  Future<List<TaskRecord>> getDownloadedTasks() =>
-      _fileDownloader.database.allRecords()
-        ..then((List<TaskRecord> records) {
+  Future<List<TaskRecord>> getDownloadedTasks()
+      {    emit(DownloadLoadingState());
 
-          /// do nothing if there's no tasks in the database
-          if (records.isEmpty) return;
+      return _fileDownloader.database.allRecords()
+          ..then((List<TaskRecord> records) {
+            /// do nothing if there's no tasks in the database
+            if (records.isEmpty) return;
 
-          /// Clear List so we can use it multiple times
-          tasks.clear();
-          for (TaskRecord record in records) {
-            log('record:$record');
-            final Task task = record.task;
-            if (task is DownloadTask) {
-              tasks.add(task);
+            /// Clear List so we can use it multiple times
+            tasks.clear();
+            for (TaskRecord record in records) {
+              log('record:$record');
+              final Task task = record.task;
+              if (task is DownloadTask) {
+                tasks.add(task);
+              }
             }
-          }
 
-          /// emit success;
-          emit(DownloadInitial());
-        }).catchError((e) {
-          /// emit error;
-          emit(DownloadErrorState(e.toString()));
-        });
+            /// emit success;
+            emit(DownloadInitial());
+          }).catchError((e) {
+            /// emit error;
+            emit(DownloadErrorState(e.toString()));
+          });
+      }
 
   exampleDownload() async {
     List<String> links = [

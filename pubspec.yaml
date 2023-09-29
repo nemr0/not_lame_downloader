@@ -48,6 +48,9 @@ dependencies:
   mime: ^1.0.4
   flutter_svg: ^2.0.7
   percent_indicator: ^4.2.3
+  skeletonizer: ^0.8.0
+  link_preview_generator: ^1.2.0
+  http: ^0.13.6
 
 dev_dependencies:
   flutter_test:
