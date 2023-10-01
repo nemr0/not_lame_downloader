@@ -68,14 +68,18 @@ class DownloadCubit extends Cubit<DownloadState> {
   }
 
   Future<List<TaskRecord>> getDownloadedTasks()
-      {    emit(DownloadLoadingState());
+      async {
+        emit(DownloadLoadingState());
 
       return _fileDownloader.database.allRecords()
           ..then((List<TaskRecord> records) {
             /// do nothing if there's no tasks in the database
-            if (records.isEmpty) return;
+            if (records.isEmpty) {
+              emit(DownloadInitial());
+          return;
+        }
 
-            /// Clear List so we can use it multiple times
+        /// Clear List so we can use it multiple times
             tasks.clear();
             for (TaskRecord record in records) {
               log('record:$record');
@@ -118,12 +122,12 @@ class DownloadCubit extends Cubit<DownloadState> {
       return;
     }
     final String id = tasks.isEmpty ? '1' : tasks.length.toString();
-    final DownloadTask task = DownloadTask(
+    final DownloadTask task = await DownloadTask(
       url: url,
       taskId: id,
       allowPause: true,
       updates: Updates.statusAndProgress,
-    );
+    ).withSuggestedFilename();
     try {
       await _fileDownloader.enqueue(task);
       tasks.add(task);
@@ -136,6 +140,16 @@ class DownloadCubit extends Cubit<DownloadState> {
 
       /// emit error;
       emit(DownloadEnqueuedErrorState(e.toString()));
+    }
+  }
+ Future<bool> deleteDownloadTask(String taskId) async{
+   try {
+     bool cancel= await _fileDownloader.cancelTaskWithId(taskId);
+        if(cancel) tasks.removeWhere((element) => element.taskId==taskId);
+     return cancel;
+    }
+    catch(e){
+     return false;
     }
   }
 }

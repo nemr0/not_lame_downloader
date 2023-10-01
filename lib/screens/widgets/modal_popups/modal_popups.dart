@@ -6,14 +6,14 @@ class ModalPopups extends StatelessWidget {
       {super.key,
       required this.child,
       required this.title,
-      this.heightRatio = 1});
+      this.heightRatio = 1, this.trailing});
 
   final Widget child;
   final Widget title;
 
   /// 0 - 1 of device's height, defaults to one
   final double heightRatio;
-
+  final Widget? trailing;
   @override
   Widget build(BuildContext context) {
     return Dismissible(
@@ -43,6 +43,7 @@ class ModalPopups extends StatelessWidget {
                       Navigator.pop(context);
                     }),
                 middle: title,
+                trailing: trailing,
               ),
               child: child,
             ),

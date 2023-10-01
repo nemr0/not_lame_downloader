@@ -14,13 +14,24 @@ class DownloadTaskDetailsModalPopup extends HookWidget {
   final String taskID;
   @override
   Widget build(BuildContext context) {
-    final record=useFuture(FileDownloader().database.recordForId(taskID));
-    final bool loading=record.hasData==false&&record.hasError==false;
+    final record=useState<TaskRecord?>(null);
+    final recordError=useState<dynamic>(null);
+    useEffect(() {
+      FileDownloader().database.recordForId(taskID).then((value) => record.value=value).catchError((e)=>
+        recordError.value=e);
+      return null;
+    },const[]);
+    final bool loading=record.value==null&&recordError.value==null;
     return Skeletonizer(
       enabled: loading,
       child: ModalPopups(
-        title:loading?const CupertinoActivityIndicator(): Text('#${record.data?.task.filename}'),
+        title:loading?const CupertinoActivityIndicator(): Text('#${record.value?.task.filename}'),
         heightRatio: .5,
+        trailing:loading?null:record.value?.status==TaskStatus.complete? CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () async => FileDownloader().openFile(filePath: await record.value?.task.filePath()) ,
+          child: const Icon(CupertinoIcons.doc_text_search),
+        ):null,
         child: Material(
           color: Colors.transparent,
           child: Padding(
@@ -39,33 +50,33 @@ class DownloadTaskDetailsModalPopup extends HookWidget {
                         // TextSpan(text: '\')
                         const WidgetSpan(child: Icon(CupertinoIcons.time_solid,size: 20,),),
 
-                        TextSpan(text: ' Creation Time: ${record.data?.task.creationTime.toLocal().toString().split('.').first}\n\n'),
+                        TextSpan(text: ' Creation Time: ${record.value?.task.creationTime.toLocal().toString().split('.').first}\n\n'),
 
                         const WidgetSpan(child: Icon(CupertinoIcons.doc_text_fill,size: 20,),),
                         TextSpan(
                             text:
-                            ' Directory: ${record.data?.task.baseDirectory.name ?? 'unknown'}\n\n'),
+                            ' Directory: ${record.value?.task.baseDirectory.name ?? 'unknown'}\n\n'),
                         const WidgetSpan(child: Icon(CupertinoIcons.link,size: 20,),),
 
                         const TextSpan(text: ' Url: '),
                         TextSpan(
-                          text: '${record.data?.task.url ?? 'unknown'}\n\n',
-                          style: record.data?.task.url==null
+                          text: '${record.value?.task.url ?? 'unknown'}\n\n',
+                          style: record.value?.task.url==null
                               ? null
                               : const TextStyle(color: CupertinoColors.systemBlue),
                           recognizer: TapGestureRecognizer()
-                            ..onTap = record.data?.task.url==null
+                            ..onTap = record.value?.task.url==null
                                 ? null
                                 : () => Share.shareUri(
-                              Uri.parse(record.data!.task.url),
+                              Uri.parse(record.value!.task.url),
                             ),
                         ),
                         const WidgetSpan(child: Icon(CupertinoIcons.app_badge_fill,size: 20,),),
 
-                        TextSpan(text: ' Status: ${record.data?.status.name}\n\n'),
+                        TextSpan(text: ' Status: ${record.value?.status.name}\n\n'),
                         const WidgetSpan(child: Icon(CupertinoIcons.percent,size: 20,),),
 
-                        TextSpan(text: ' Progress: ${record.data?.progress==null?'unknown':'${(record.data!.progress*100).toInt()}%'}'),
+                        TextSpan(text: ' Progress: ${record.value?.progress==null?'unknown':'${(record.value!.progress*100).toInt()}%'}'),
                       ],),maxLines: 12,),
                 ),
               ],
