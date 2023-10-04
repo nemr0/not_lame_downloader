@@ -11,11 +11,13 @@ part 'download_state.dart';
 part 'download_task_state_handler.dart';
 class DownloadCubit extends Cubit<DownloadState> {
   DownloadCubit() : super(DownloadInitial());
-  List<DownloadTask> tasks = [];
+  List<TaskWithUpdates> tasks = [];
   final FileDownloader _fileDownloader= FileDownloader();
   static DownloadCubit get(BuildContext context) => BlocProvider.of<DownloadCubit>(context);
 
   initialize() async {
+    //TODO: Save Tasks states
+    _fileDownloader.database.deleteAllRecords();
     emit(DownloadLoadingState());
     _fileDownloader.resumeFromBackground();
     // configure notification for all tasks
@@ -60,15 +62,17 @@ class DownloadCubit extends Cubit<DownloadState> {
     // Listen to updates and process
     emit(DownloadInitial());
     FileDownloader().updates.listen((update) async {
-     emit(_downloadStateUpdate( state, update));
+      // DownloadTaskUpdateState downloadTaskUpdateState=
+      tasks =_downloadStateUpdate( update,tasks);
+     // ignore: prefer_const_constructors
+     emit(DownloadTaskUpdateState());
 
     });
     getDownloadedTasks();
 
   }
 
-  Future<List<TaskRecord>> getDownloadedTasks()
-      async {
+  Future<List<TaskRecord>> getDownloadedTasks() async {
         emit(DownloadLoadingState());
 
       return _fileDownloader.database.allRecords()
@@ -84,9 +88,7 @@ class DownloadCubit extends Cubit<DownloadState> {
             for (TaskRecord record in records) {
               log('record:$record');
               final Task task = record.task;
-              if (task is DownloadTask) {
-                tasks.add(task);
-              }
+              if (task is DownloadTask) tasks.add(TaskWithUpdates(task));
             }
 
             /// emit success;
@@ -112,7 +114,7 @@ class DownloadCubit extends Cubit<DownloadState> {
   addDownloadTask(String url, {bool pop = true}) async {
     emit(DownloadEnqueuedLoadingState());
 
-    bool taskExists = tasks.any((element) => url == element.url);
+    bool taskExists = tasks.any((element) => element.task.url==url);
 
     if (taskExists) {
       // Emit Error;
@@ -121,7 +123,9 @@ class DownloadCubit extends Cubit<DownloadState> {
 
       return;
     }
-    final String id = tasks.isEmpty ? '1' : tasks.length.toString();
+    // final String id = (tasks.isEmpty)?'1':(tasks.length+1).toString();
+    final id =UniqueKey().toString();
+    print(id);
     final DownloadTask task = await DownloadTask(
       url: url,
       taskId: id,
@@ -130,7 +134,7 @@ class DownloadCubit extends Cubit<DownloadState> {
     ).withSuggestedFilename();
     try {
       await _fileDownloader.enqueue(task);
-      tasks.add(task);
+      tasks.add(TaskWithUpdates(task));
 
       /// emit success;
       log('task enqueued');
@@ -145,7 +149,10 @@ class DownloadCubit extends Cubit<DownloadState> {
  Future<bool> deleteDownloadTask(String taskId) async{
    try {
      bool cancel= await _fileDownloader.cancelTaskWithId(taskId);
-        if(cancel) tasks.removeWhere((element) => element.taskId==taskId);
+        if(cancel) tasks.removeWhere((element) => element.task.taskId==taskId);
+        print(tasks);
+        // ignore: prefer_const_constructors
+        emit(DownloadTaskUpdateState());
      return cancel;
     }
     catch(e){

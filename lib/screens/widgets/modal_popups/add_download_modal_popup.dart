@@ -67,6 +67,7 @@ class AddDownloadModalPopUp extends HookWidget {
                child: (showPreview.value)?Padding(padding: const EdgeInsets.all(12),
                child: LinkPreviewGenerator(link: controller.text)):const SizedBox.shrink()),
              ),
+              // CupertinoButton(child: Text('test'), onPressed: (){Add}),
               Padding(
                 padding: const EdgeInsets.only(top: 20.0),
                 child: BlocListener<DownloadCubit, DownloadState>(
@@ -112,7 +113,7 @@ class AddDownloadModalPopUp extends HookWidget {
                         } else {}
                         },
 
-                    )
+                    ),
 
                 ),
               ),
@@ -145,7 +146,10 @@ class AddDownloadModalPopUp extends HookWidget {
                         onPressed: onPasteOrClear,
                         child: Text(didPaste.value ? 'Clear' : 'Paste')),
                   )),
-
+              CupertinoButton(child: Text('text'), onPressed: (){
+                DownloadCubit.get(context).exampleDownload();
+                Navigator.pop(context);
+              })
             ],
           )
       ),

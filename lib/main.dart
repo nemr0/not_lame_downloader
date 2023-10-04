@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:not_lame_downloader/cubits/downloaded_loader_cubit/downloaded_loader_cubit.dart';
+import 'package:not_lame_downloader/cubits/file_cubit/file_cubit.dart';
 import 'package:not_lame_downloader/cubits/theme_cubit/theme_cubit.dart';
 
 import 'cubits/download_cubit/download_cubit.dart';
@@ -12,7 +12,6 @@ import 'main_page.dart';
 Future<void> main() async {
   await GetStorage.init();
   await FileDownloader().trackTasks();
-  FileDownloader().destroy();
   runApp(const MyApp());
 }
 
@@ -26,7 +25,7 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (BuildContext context) =>
-              DownloadedLoaderCubit()..initializeOrUpdate(firstLoad: true),
+              FileCubit()..initializeOrUpdate(firstLoad: true),
           lazy: false,
         ),
         BlocProvider(

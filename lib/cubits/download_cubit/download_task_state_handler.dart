@@ -1,42 +1,26 @@
 part of 'download_cubit.dart';
 
-DownloadTaskUpdateState _downloadStateUpdate(DownloadState state,TaskUpdate update){
-  List<TaskProgressStatus> updateList=[];
-  if(state is DownloadTaskUpdateState) {
-    updateList .addAll(  (state).updateList??[]);
-  }
-  switch(update){
+List<TaskWithUpdates> _downloadStateUpdate(TaskUpdate update, List<TaskWithUpdates> tasks) {
+ final int index = tasks.indexWhere((element) => element.task.taskId == update.task.taskId);
+
+  switch (update) {
     case TaskStatusUpdate():
-      if(updateList.isEmpty){
-        updateList.add(TaskProgressStatus(update.task, statusUpdate: update));
+      // if index not found
+      if (index == -1) {
+        tasks.add(TaskWithUpdates(update.task as DownloadTask));
+      } else {
+        tasks[index] = tasks[index].copyWith(statusUpdate: update);
       }
-      else{
-        final int index = updateList.indexWhere(
-                (element) => element.task.taskId == update.task.taskId);
-        if (index == -1) {
-          updateList
-              .add(TaskProgressStatus(update.task, statusUpdate: update));
-        } else {
-          updateList[index] =
-              updateList[index].copyWith(statusUpdate: update);
-        }
-      }
+    print('${update.task.taskId}:${update.status.name}');
     case TaskProgressUpdate():
-      if(updateList.isEmpty){
-        updateList.add(TaskProgressStatus(update.task, progressUpdate: update));
+      // if index not found
+      if (index == -1) {
+        tasks.add(TaskWithUpdates(update.task as DownloadTask));
+      } else {
+        tasks[index] = tasks[index].copyWith(progressUpdate: update);
       }
-      else{
-        final int index = updateList.indexWhere(
-                (element) => element.task.taskId == update.task.taskId);
-        if (index == -1) {
-          updateList.add(
-              TaskProgressStatus(update.task, progressUpdate: update));
-        } else {
-          updateList[index] =
-              updateList[index].copyWith(progressUpdate: update);
-        }
-      }
+      print('${update.task.taskId}:${update.progress}');
 
   }
-  return DownloadTaskUpdateState(updateList: updateList);
+  return tasks;
 }

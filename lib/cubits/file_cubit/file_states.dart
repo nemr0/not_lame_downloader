@@ -1,4 +1,4 @@
-part of 'downloaded_loader_cubit.dart';
+part of 'file_cubit.dart';
 
 abstract class DownloadedLoaderState extends Equatable {
   const DownloadedLoaderState();

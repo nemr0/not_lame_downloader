@@ -7,16 +7,21 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../helpers/remove_unused_files.dart';
 
-part 'downloaded_loader_state.dart';
+part 'file_states.dart';
 
-class DownloadedLoaderCubit extends Cubit<DownloadedLoaderState> {
-  DownloadedLoaderCubit() : super(DownloadedLoaderInitial());
+class FileCubit extends Cubit<DownloadedLoaderState> {
+  FileCubit() : super(DownloadedLoaderInitial());
   late final Directory documentDirectory;
-  late final List<FileSystemEntity> files;
+  List<FileSystemEntity> files=[];
 
   initializeOrUpdate({bool firstLoad = false}) async {
-    if (firstLoad) documentDirectory = await getApplicationDocumentsDirectory();
-    files = removeUnusedFilesFromDocumentDirectory(documentDirectory.listSync());
+    if (firstLoad) {
+      documentDirectory = await getApplicationDocumentsDirectory();
+    }
+    else{
+      files.clear();
+    }
+    files .addAll(removeUnusedFilesFromDocumentDirectory(documentDirectory.listSync()));
 
 
     log('DownloadCubit: documentDirectory.path:${documentDirectory.path}, files:${files.toString()}');

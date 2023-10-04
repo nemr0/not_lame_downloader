@@ -39,29 +39,30 @@ class DownloadTaskEnqueuedState extends DownloadState {
 }
 
 class DownloadTaskUpdateState extends DownloadState {
-  final List<TaskProgressStatus>? updateList;
 
-  const DownloadTaskUpdateState({ this.updateList});
+  const DownloadTaskUpdateState();
 
 
   @override
-  List<Object> get props => [updateList.toString()];
+  List<Object> get props => [UniqueKey()];
 }
 
-class TaskProgressStatus extends Equatable{
+class TaskWithUpdates extends Equatable{
 
-  final Task task;
+  final DownloadTask task;
   final TaskStatusUpdate? statusUpdate;
   final TaskProgressUpdate? progressUpdate;
 
-  const TaskProgressStatus(this.task, { this.statusUpdate, this.progressUpdate});
+  const TaskWithUpdates(this.task, { this.statusUpdate, this.progressUpdate});
 
-  TaskProgressStatus copyWith(
+  TaskWithUpdates copyWith(
       { TaskStatusUpdate? statusUpdate, TaskProgressUpdate? progressUpdate}) =>
-      TaskProgressStatus(
+      TaskWithUpdates(
           task, statusUpdate: statusUpdate ?? this.statusUpdate,
           progressUpdate: progressUpdate ?? this.progressUpdate);
 
   @override
-  List<Object?> get props => [task,statusUpdate,progressUpdate];
+  List<Object?> get props => [task.taskId,statusUpdate,progressUpdate];
 }
+
+// typedef TaskWithUpdates=(Task task, TaskProgressUpdate? progressUpdate,TaskStatusUpdate? status);

@@ -52,34 +52,34 @@ class LoadingDownloadTaskWidget extends StatelessWidget {
 
 class DownloadTaskWidget extends HookWidget {
   const DownloadTaskWidget(
-      {super.key, required this.task, required this.update});
+      {super.key, required this.taskWithUpdates});
 
-  final TaskProgressStatus? update;
-  final DownloadTask task;
+  final TaskWithUpdates taskWithUpdates;
+
 
   @override
   Widget build(BuildContext context) {
-    final double? progress = update?.progressUpdate?.progress;
-    final TaskStatus? status = update?.statusUpdate?.status;
+    final double? progress = taskWithUpdates.progressUpdate?.progress;
+    final TaskStatus? status = taskWithUpdates.statusUpdate?.status;
     final bool showProgress = (status != null)
         ? (status == TaskStatus.complete)
             ? false
             : progress != null &&
                 progress != 1.0 &&
-                progress > 0 &&
+                progress >= 0 &&
                 progress < 1
         : false;
     final bool noUpdates =
-        (update?.statusUpdate == null && update?.progressUpdate == null) ||
-            (update?.statusUpdate == null && progress == 1);
+        (taskWithUpdates.statusUpdate == null && taskWithUpdates.progressUpdate == null) ||
+            (taskWithUpdates.statusUpdate == null && progress == 1);
 
     final isPaused = useState(noUpdates ? true : false);
     final String? remainingTime =
-        update?.progressUpdate?.timeRemaining.toString().split('.').first ==
+        taskWithUpdates.progressUpdate?.timeRemaining.toString().split('.').first ==
                 '-0:00:01'
             ? 'unknown'
-            : update?.progressUpdate?.timeRemaining.toString().split('.').first;
-    final String? statusName = update?.statusUpdate?.status.name;
+            : taskWithUpdates.progressUpdate?.timeRemaining.toString().split('.').first;
+    final String? statusName = taskWithUpdates.statusUpdate?.status.name;
     // final statusFuture =
     //     useFuture(FileDownloader().database.recordForId(task.taskId));
     return CupertinoContextMenu.builder(
@@ -88,17 +88,17 @@ class DownloadTaskWidget extends HookWidget {
           CupertinoContextMenuAction(
               onPressed: () {
                 DownloadCubit.get(context)
-                    .deleteDownloadTask(task.taskId)
+                    .deleteDownloadTask(taskWithUpdates.task.taskId)
                     .then((value) {
                   if (!value) {
-                    showToast(context, 'Couldn\'t Remove #${task.filename}');
+                    showToast(context, 'Couldn\'t Remove #${taskWithUpdates.task.filename}');
                   }
                 });
                 Navigator.of(context).pop();
               },
               isDestructiveAction: true,
               trailingIcon: CupertinoIcons.delete,
-              child: const Text('Delete'))
+              child:  Text(status==TaskStatus.canceled?'Delete':'Cancel'))
         ],
         builder: (BuildContext context, Animation<double> animation) => Padding(
             padding: const EdgeInsets.all(12.0),
@@ -110,11 +110,11 @@ class DownloadTaskWidget extends HookWidget {
                       .barBackgroundColor
                       .withOpacity(.7),
                   onPressed: () {
-                    showCupertinoModalPopup(
-                        context: context,
-                        builder: (context) => DownloadTaskDetailsModalPopup(
-                              taskID: task.taskId,
-                            ));
+                    // showCupertinoModalPopup(
+                    //     context: context,
+                    //     builder: (context) => DownloadTaskDetailsModalPopup(
+                    //           taskID: taskWithUpdates.task.taskId,
+                    //         ));
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -136,7 +136,7 @@ class DownloadTaskWidget extends HookWidget {
                           flex: 7,
                           child: Text.rich(
                             TextSpan(
-                                text: task.filename,
+                                text: taskWithUpdates.task.filename,
                                 style: TextStyle(
                                     color: CupertinoTheme.of(context)
                                         .textTheme
@@ -169,12 +169,12 @@ class DownloadTaskWidget extends HookWidget {
                               if (isPaused.value) {
                                 isPaused.value = false;
                                 FileDownloader()
-                                    .resume(task)
+                                    .resume(taskWithUpdates.task)
                                     .then((value) => isPaused.value = !value);
                               } else {
                                 isPaused.value = true;
                                 FileDownloader()
-                                    .pause(task)
+                                    .pause(taskWithUpdates.task)
                                     .then((value) => isPaused.value = value);
                               }
                             },
@@ -207,12 +207,12 @@ class DownloadTaskWidget extends HookWidget {
                               if (isPaused.value) {
                                 isPaused.value = false;
                                 FileDownloader()
-                                    .resume(task)
+                                    .resume(taskWithUpdates.task)
                                     .then((value) => isPaused.value = !value);
                               } else {
                                 isPaused.value = true;
                                 FileDownloader()
-                                    .pause(task)
+                                    .pause(taskWithUpdates.task)
                                     .then((value) => isPaused.value = value);
                               }
                             },
