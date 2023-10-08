@@ -88,7 +88,8 @@ class DownloadCubit extends Cubit<DownloadState> {
             for (TaskRecord record in records) {
               log('record:$record');
               final Task task = record.task;
-              if (task is DownloadTask) tasks.add(TaskWithUpdates(task));
+
+              if (task is DownloadTask) tasks.add(TaskWithUpdates(task,statusUpdate: TaskStatusUpdate(task, record.status,record.exception),progressUpdate: TaskProgressUpdate(task, record.progress,record.expectedFileSize)));
             }
 
             /// emit success;

@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' show Colors,Material;
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:not_lame_downloader/cubits/download_cubit/download_cubit.dart';
+import 'package:not_lame_downloader/helpers/overlays/toast.dart';
 import 'package:not_lame_downloader/screens/widgets/modal_popups/modal_popups.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -17,8 +19,21 @@ class DownloadTaskDetailsModalPopup extends HookWidget {
     final record=useState<TaskRecord?>(null);
     final recordError=useState<dynamic>(null);
     useEffect(() {
-      FileDownloader().database.recordForId(taskID).then((value) => record.value=value).catchError((e)=>
-        recordError.value=e);
+      FileDownloader().database.recordForId(taskID).then((value) {
+        print('record: $value');
+        if(value==null){
+          showToast(context, 'Task is removed');
+          Navigator.pop(context);
+          DownloadCubit.get(context).deleteDownloadTask(taskID);
+        }
+        else {
+          record.value = value;
+        }
+      }).catchError((e) {
+        recordError.value = e;
+        print('recordError: $e');
+
+      });
       return null;
     },const[]);
     final bool loading=record.value==null&&recordError.value==null;

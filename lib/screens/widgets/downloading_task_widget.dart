@@ -68,12 +68,12 @@ class DownloadTaskWidget extends HookWidget {
                 progress != 1.0 &&
                 progress >= 0 &&
                 progress < 1
-        : false;
-    final bool noUpdates =
-        (taskWithUpdates.statusUpdate == null && taskWithUpdates.progressUpdate == null) ||
-            (taskWithUpdates.statusUpdate == null && progress == 1);
+        : progress != null &&
+        progress != 1.0 &&
+        progress >= 0 &&
+        progress < 1;
 
-    final isPaused = useState(noUpdates ? true : false);
+    final isPaused = useState(status==TaskStatus.paused);
     final String? remainingTime =
         taskWithUpdates.progressUpdate?.timeRemaining.toString().split('.').first ==
                 '-0:00:01'
@@ -104,145 +104,140 @@ class DownloadTaskWidget extends HookWidget {
             padding: const EdgeInsets.all(12.0),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: CupertinoButton(
-                  padding: const EdgeInsets.all(15),
-                  color: CupertinoTheme.of(context)
-                      .barBackgroundColor
-                      .withOpacity(.7),
-                  onPressed: () {
-                    // showCupertinoModalPopup(
-                    //     context: context,
-                    //     builder: (context) => DownloadTaskDetailsModalPopup(
-                    //           taskID: taskWithUpdates.task.taskId,
-                    //         ));
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: Image.asset(
-                          AppAssets.assets_file_png,
-                          color: CupertinoTheme.of(context).brightness ==
-                                  Brightness.dark
-                              ? CupertinoColors.extraLightBackgroundGray
-                              : CupertinoColors.darkBackgroundGray,
-                          height: 40,
-                        ),
-                      ),
-                      const Spacer(),
-                      // const Spacer(),
-                      Expanded(
-                          flex: 7,
-                          child: Text.rich(
-                            TextSpan(
-                                text: taskWithUpdates.task.filename,
-                                style: TextStyle(
-                                    color: CupertinoTheme.of(context)
-                                        .textTheme
-                                        .textStyle
-                                        .color),
-                                children: [
-                                  if (status != TaskStatus.complete &&
-                                          progress != 1
-                                      // &&
-                                      // statusFuture.data?.status !=
-                                      //     TaskStatus.complete
-                                      )
-                                    TextSpan(text: '\n⏳: $remainingTime'),
-                                  if (status != TaskStatus.complete &&
-                                          progress != 1
-                                      // &&
-                                      // statusFuture.data?.status !=
-                                      //     TaskStatus.complete
-                                      )
-                                    TextSpan(text: '\nStatus: $statusName')
-                                ]),
-                            overflow: TextOverflow.clip,
-                          )),
-                      const Spacer(),
-                      if (showProgress)
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                decoration: BoxDecoration(color: CupertinoTheme.of(context)
+                    .barBackgroundColor
+                    .withOpacity(.7),borderRadius: BorderRadius.circular(20)),
+                child: CupertinoButton(
+                    padding: const EdgeInsets.all(15),
+                    // color: Color
+                    onPressed: () {
+                      showCupertinoModalPopup(
+                          context: context,
+                          builder: (context) => DownloadTaskDetailsModalPopup(
+                                taskID: taskWithUpdates.task.taskId,
+                              ));
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
                         Expanded(
-                          child: CupertinoButton(
-                            padding: EdgeInsets.zero,
-                            onPressed: () async {
-                              if (isPaused.value) {
-                                isPaused.value = false;
-                                FileDownloader()
-                                    .resume(taskWithUpdates.task)
-                                    .then((value) => isPaused.value = !value);
-                              } else {
-                                isPaused.value = true;
-                                FileDownloader()
-                                    .pause(taskWithUpdates.task)
-                                    .then((value) => isPaused.value = value);
-                              }
-                            },
-                            child: CircularPercentIndicator(
-                              percent: progress,
-                              radius: 20,
-                              center: Icon(
+                          flex: 2,
+                          child: Image.asset(
+                            AppAssets.assets_file_png,
+                            color: CupertinoTheme.of(context).brightness ==
+                                    Brightness.dark
+                                ? CupertinoColors.extraLightBackgroundGray
+                                : CupertinoColors.darkBackgroundGray,
+                            height: 40,
+                          ),
+                        ),
+                        const Spacer(),
+                        // const Spacer(),
+                        Expanded(
+                            flex: 7,
+                            child: Text.rich(
+                              TextSpan(
+                                  text: taskWithUpdates.task.filename,
+                                  style: TextStyle(
+                                      color: CupertinoTheme.of(context)
+                                          .textTheme
+                                          .textStyle
+                                          .color),
+                                  children: [
+
+                                    if (status != TaskStatus.complete && progress != 1 && remainingTime !=null&&status!=TaskStatus.paused)
+                                      TextSpan(text: '\n⏳: $remainingTime'),
+                                    if (status != TaskStatus.complete && progress != 1 && statusName !=null)
+                                      TextSpan(text: '\nStatus: $statusName')
+                                  ]),
+                              overflow: TextOverflow.clip,
+                            )),
+                        const Spacer(),
+                        if (showProgress)
+                          Expanded(
+                            child: CupertinoButton(
+                              padding: EdgeInsets.zero,
+                              onPressed: () async {
+                                if (isPaused.value) {
+                                  isPaused.value = false;
+                                  FileDownloader()
+                                      .resume(taskWithUpdates.task)
+                                      .then((value) => isPaused.value = !value);
+                                } else {
+                                  isPaused.value = true;
+                                  FileDownloader()
+                                      .pause(taskWithUpdates.task)
+                                      .then((value) => isPaused.value = value);
+                                }
+                              },
+                              child: CircularPercentIndicator(
+                                percent: progress,
+                                radius: 20,
+                                center: Icon(
+                                  isPaused.value
+                                      ? CupertinoIcons.play_fill
+                                      : CupertinoIcons.pause_fill,
+                                  size: 18,
+                                ),
+                                lineWidth: 3,
+                                restartAnimation: true,
+                                progressColor:
+                                    CupertinoTheme.of(context).primaryColor,
+                              ),
+                            ),
+                          ),
+
+                        /// if paused
+                        if ((progress == -5 )
+                            // &&
+                            // statusFuture.data?.status != TaskStatus.complete
+                            )
+                          Expanded(
+                            child: CupertinoButton(
+                              padding: EdgeInsets.zero,
+                              onPressed: () async {
+                                if (isPaused.value) {
+                                  isPaused.value = false;
+                                  FileDownloader()
+                                      .resume(taskWithUpdates.task)
+                                      .then((value) => isPaused.value = !value);
+                                } else {
+                                  isPaused.value = true;
+                                  FileDownloader()
+                                      .pause(taskWithUpdates.task)
+                                      .then((value) => isPaused.value = value);
+                                }
+                              },
+                              child: Icon(
                                 isPaused.value
                                     ? CupertinoIcons.play_fill
                                     : CupertinoIcons.pause_fill,
                                 size: 18,
                               ),
-                              lineWidth: 3,
-                              restartAnimation: true,
-                              progressColor:
-                                  CupertinoTheme.of(context).primaryColor,
                             ),
                           ),
-                        ),
 
-                      /// if paused
-                      if ((progress == -5 || noUpdates)
-                          // &&
-                          // statusFuture.data?.status != TaskStatus.complete
-                          )
-                        Expanded(
-                          child: CupertinoButton(
-                            padding: EdgeInsets.zero,
-                            onPressed: () async {
-                              if (isPaused.value) {
-                                isPaused.value = false;
-                                FileDownloader()
-                                    .resume(taskWithUpdates.task)
-                                    .then((value) => isPaused.value = !value);
-                              } else {
-                                isPaused.value = true;
-                                FileDownloader()
-                                    .pause(taskWithUpdates.task)
-                                    .then((value) => isPaused.value = value);
-                              }
-                            },
-                            child: Icon(
-                              isPaused.value
-                                  ? CupertinoIcons.play_fill
-                                  : CupertinoIcons.pause_fill,
-                              size: 18,
-                            ),
+                        /// If Download Succeeded
+                        if (!showProgress && progress == 1)
+                          const Icon(
+                            CupertinoIcons.check_mark_circled_solid,
+                            color: CupertinoColors.activeGreen,
+                            size: 40,
                           ),
-                        ),
 
-                      /// If Download Succeeded
-                      if (!showProgress && progress == 1)
-                        const Icon(
-                          CupertinoIcons.check_mark_circled_solid,
-                          color: CupertinoColors.activeGreen,
-                          size: 40,
-                        ),
-
-                      /// If Download Failed
-                      if (!showProgress && progress == -1)
-                        const Icon(
-                          CupertinoIcons.xmark_circle_fill,
-                          color: CupertinoColors.destructiveRed,
-                          size: 40,
-                        ),
-                      const Spacer(),
-                    ],
-                  )),
+                        /// If Download Failed
+                        if (!showProgress && progress == -1)
+                          const Icon(
+                            CupertinoIcons.xmark_circle_fill,
+                            color: CupertinoColors.destructiveRed,
+                            size: 40,
+                          ),
+                        const Spacer(),
+                      ],
+                    )),
+              ),
             )));
   }
 }

@@ -146,7 +146,7 @@ class AddDownloadModalPopUp extends HookWidget {
                         onPressed: onPasteOrClear,
                         child: Text(didPaste.value ? 'Clear' : 'Paste')),
                   )),
-              CupertinoButton(child: Text('text'), onPressed: (){
+              CupertinoButton(child: const Text('test'), onPressed: (){
                 DownloadCubit.get(context).exampleDownload();
                 Navigator.pop(context);
               })
