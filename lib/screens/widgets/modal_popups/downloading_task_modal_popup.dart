@@ -44,7 +44,7 @@ class DownloadTaskDetailsModalPopup extends HookWidget {
         heightRatio: .5,
         trailing:loading?null:record.value?.status==TaskStatus.complete? CupertinoButton(
           padding: EdgeInsets.zero,
-          onPressed: () async => FileDownloader().openFile(filePath: await record.value?.task.filePath()) ,
+          onPressed: () async => Share.shareXFiles([XFile(await record.value?.task.filePath()??'')]) ,
           child: const Icon(CupertinoIcons.doc_text_search),
         ):null,
         child: Material(

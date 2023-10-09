@@ -9,7 +9,7 @@ printTasks(List<TaskWithUpdates> tasks){
 
   String printString =('\n------------------------------------\nTasks:(');
   for(TaskWithUpdates task in tasks){
-    printString+='(taskID:${task.task.taskId},status:${task.statusUpdate?.status.name},progress:${task.progressUpdate?.progress})';
+    printString+='(taskID:${task.task.taskId},status:${task.statusUpdate.status.name},progress:${task.progressUpdate.progress})';
   }
   printString+=')\n------------------------------------';
 log(printString);
@@ -23,32 +23,42 @@ class DownloadTasksPage extends StatelessWidget {
 
       final List<TaskWithUpdates> tasks = DownloadCubit.get(context).tasks;
       // printTasks(tasks);
-      return AnimatedSwitcher(
-        duration: const Duration(milliseconds: 500),
-        child: (state is DownloadLoadingState)
-            ? ListView.builder(
-                itemCount: 4,
-                physics: const NeverScrollableScrollPhysics(),
-                itemExtent: context.height / 9,
-                itemBuilder: (BuildContext context, int index) =>
-                    const LoadingDownloadTaskWidget(),
-              )
-            : (tasks.isEmpty)
-                ? Center(
-                    child: Text(
-                    'No Downloads is added :)',
-                    style: CupertinoTheme.of(context)
-                        .textTheme
-                        .tabLabelTextStyle
-                        .copyWith(fontSize: 16),
-                  ))
-                : ListView.builder(
-                    itemCount: tasks.length,
-                    itemBuilder: (context, index) =>
-                       DownloadTaskWidget(
-                        taskWithUpdates: tasks[index],
+      return CustomScrollView(
+        slivers: [
+          CupertinoSliverRefreshControl(
+            onRefresh: () async=> await
+              DownloadCubit.get(context).getDownloadedTasks(),
+          ),
+          (state is DownloadLoadingState)
+                ? SliverList(delegate: SliverChildBuilderDelegate((BuildContext context, int index) =>
+            const LoadingDownloadTaskWidget(),
+                    childCount: 4,
+                    )
+                  )
+                : (tasks.isEmpty)
+                    ? SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: context.height*.75,
+                        width: context.width*.7,
+                        child: Center(
+                            child: Text(
+                            'No Downloads is added :)',
+                            style: CupertinoTheme.of(context)
+                                .textTheme
+                                .tabLabelTextStyle
+                                .copyWith(fontSize: 16),
+                          )),
                       ),
-                    ),
+                    )
+                    : SliverList(
+delegate: SliverChildBuilderDelegate(   (context, index) =>
+    DownloadTaskWidget(
+      taskWithUpdates: tasks[index],
+    ),                       childCount: tasks.length,
+
+                        ),),
+
+        ],
       );
     });
   }

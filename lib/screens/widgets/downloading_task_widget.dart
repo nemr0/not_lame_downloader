@@ -1,5 +1,6 @@
 import 'package:background_downloader/background_downloader.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Colors;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:not_lame_downloader/helpers/extensions/context_extension.dart';
 import 'package:not_lame_downloader/helpers/overlays/toast.dart';
@@ -59,29 +60,34 @@ class DownloadTaskWidget extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double? progress = taskWithUpdates.progressUpdate?.progress;
-    final TaskStatus? status = taskWithUpdates.statusUpdate?.status;
-    final bool showProgress = (status != null)
-        ? (status == TaskStatus.complete)
-            ? false
-            : progress != null &&
-                progress != 1.0 &&
-                progress >= 0 &&
-                progress < 1
-        : progress != null &&
-        progress != 1.0 &&
+
+    final double progress = taskWithUpdates.progressUpdate.progress;
+    final TaskStatus status = taskWithUpdates.statusUpdate.status;
+    final showProgress = taskWithUpdates.statusUpdate.exception!=null? false:(status==TaskStatus.complete)?false:                progress != 1.0 &&
         progress >= 0 &&
         progress < 1;
-
-    final isPaused = useState(status==TaskStatus.paused);
-    final String? remainingTime =
-        taskWithUpdates.progressUpdate?.timeRemaining.toString().split('.').first ==
+    final bool isPaused = status == TaskStatus.paused;
+    // final bool showProgress =
+    // taskWithUpdates.statusUpdate?.exception!=null?false:
+    // (status != null)
+    //     ? (status == TaskStatus.complete)
+    //         ? false
+    //         : progress != null &&
+    //             progress != 1.0 &&
+    //             progress >= 0 &&
+    //             progress < 1
+    //     : progress != null &&
+    //     progress != 1.0 &&
+    //     progress >= 0 &&
+    //     progress < 1;
+    //
+    // final isPaused = useState(status==TaskStatus.paused);
+    final String remainingTime =
+        taskWithUpdates.progressUpdate.timeRemaining.toString().split('.').first ==
                 '-0:00:01'
             ? 'unknown'
-            : taskWithUpdates.progressUpdate?.timeRemaining.toString().split('.').first;
-    final String? statusName = taskWithUpdates.statusUpdate?.status.name;
-    // final statusFuture =
-    //     useFuture(FileDownloader().database.recordForId(task.taskId));
+            : taskWithUpdates.progressUpdate.timeRemaining.toString().split('.').first;
+    final String statusName = taskWithUpdates.statusUpdate.status.name;
     return CupertinoContextMenu.builder(
         enableHapticFeedback: true,
         actions: [
@@ -98,7 +104,7 @@ class DownloadTaskWidget extends HookWidget {
               },
               isDestructiveAction: true,
               trailingIcon: CupertinoIcons.delete,
-              child:  Text(status==TaskStatus.canceled?'Delete':'Cancel'))
+              child:  Text(status==TaskStatus.running?'Cancel':'Delete'))
         ],
         builder: (BuildContext context, Animation<double> animation) => Padding(
             padding: const EdgeInsets.all(12.0),
@@ -112,13 +118,12 @@ class DownloadTaskWidget extends HookWidget {
                 child: CupertinoButton(
                     padding: const EdgeInsets.all(15),
                     // color: Color
-                    onPressed: () {
+                    onPressed: () =>
                       showCupertinoModalPopup(
                           context: context,
                           builder: (context) => DownloadTaskDetailsModalPopup(
                                 taskID: taskWithUpdates.task.taskId,
-                              ));
-                    },
+                              )),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -147,9 +152,9 @@ class DownloadTaskWidget extends HookWidget {
                                           .color),
                                   children: [
 
-                                    if (status != TaskStatus.complete && progress != 1 && remainingTime !=null&&status!=TaskStatus.paused)
+                                    if (status != TaskStatus.complete && progress != 1&&status!=TaskStatus.paused)
                                       TextSpan(text: '\n⏳: $remainingTime'),
-                                    if (status != TaskStatus.complete && progress != 1 && statusName !=null)
+                                    if (status != TaskStatus.complete && progress != 1)
                                       TextSpan(text: '\nStatus: $statusName')
                                   ]),
                               overflow: TextOverflow.clip,
@@ -160,23 +165,21 @@ class DownloadTaskWidget extends HookWidget {
                             child: CupertinoButton(
                               padding: EdgeInsets.zero,
                               onPressed: () async {
-                                if (isPaused.value) {
-                                  isPaused.value = false;
+                                if (isPaused) {
+
                                   FileDownloader()
-                                      .resume(taskWithUpdates.task)
-                                      .then((value) => isPaused.value = !value);
+                                      .resume(taskWithUpdates.task);
                                 } else {
-                                  isPaused.value = true;
                                   FileDownloader()
-                                      .pause(taskWithUpdates.task)
-                                      .then((value) => isPaused.value = value);
+                                      .pause(taskWithUpdates.task);
                                 }
                               },
                               child: CircularPercentIndicator(
-                                percent: progress,
+                                percent: showProgress? progress:0,
                                 radius: 20,
+                                backgroundColor: Colors.transparent,
                                 center: Icon(
-                                  isPaused.value
+                                  isPaused
                                       ? CupertinoIcons.play_fill
                                       : CupertinoIcons.pause_fill,
                                   size: 18,
@@ -190,28 +193,21 @@ class DownloadTaskWidget extends HookWidget {
                           ),
 
                         /// if paused
-                        if ((progress == -5 )
-                            // &&
-                            // statusFuture.data?.status != TaskStatus.complete
-                            )
+                        if ((progress == -5 ))
                           Expanded(
                             child: CupertinoButton(
                               padding: EdgeInsets.zero,
                               onPressed: () async {
-                                if (isPaused.value) {
-                                  isPaused.value = false;
+                                if (isPaused) {
                                   FileDownloader()
-                                      .resume(taskWithUpdates.task)
-                                      .then((value) => isPaused.value = !value);
+                                      .resume(taskWithUpdates.task);
                                 } else {
-                                  isPaused.value = true;
                                   FileDownloader()
-                                      .pause(taskWithUpdates.task)
-                                      .then((value) => isPaused.value = value);
+                                      .pause(taskWithUpdates.task);
                                 }
                               },
                               child: Icon(
-                                isPaused.value
+                                isPaused
                                     ? CupertinoIcons.play_fill
                                     : CupertinoIcons.pause_fill,
                                 size: 18,
@@ -228,7 +224,7 @@ class DownloadTaskWidget extends HookWidget {
                           ),
 
                         /// If Download Failed
-                        if (!showProgress && progress == -1)
+                        if ((!showProgress && progress == -1) ||(!showProgress && status==TaskStatus.failed))
                           const Icon(
                             CupertinoIcons.xmark_circle_fill,
                             color: CupertinoColors.destructiveRed,

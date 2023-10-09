@@ -1,4 +1,4 @@
-package com.example.download_in_background_example
+package dev.nemr.not_lame_downloader
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -5,9 +5,12 @@ List<TaskWithUpdates> _downloadStateUpdate(TaskUpdate update, List<TaskWithUpdat
 
   switch (update) {
     case TaskStatusUpdate():
+      if(update.status==TaskStatus.failed){
+        print(update.exception);
+      }
       // if index not found
       if (index == -1) {
-        tasks.add(TaskWithUpdates(update.task as DownloadTask));
+        tasks.add(TaskWithUpdates(update.task as DownloadTask, statusUpdate: update,progressUpdate: TaskProgressUpdate(update.task, -1)));
       } else {
         tasks[index] = tasks[index].copyWith(statusUpdate: update);
       }
@@ -15,7 +18,7 @@ List<TaskWithUpdates> _downloadStateUpdate(TaskUpdate update, List<TaskWithUpdat
     case TaskProgressUpdate():
       // if index not found
       if (index == -1) {
-        tasks.add(TaskWithUpdates(update.task as DownloadTask));
+        tasks.add(TaskWithUpdates(update.task as DownloadTask, statusUpdate: TaskStatusUpdate(update.task, TaskStatus.running), progressUpdate: update));
       } else {
         tasks[index] = tasks[index].copyWith(progressUpdate: update);
       }

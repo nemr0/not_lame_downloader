@@ -49,6 +49,7 @@ dependencies:
   skeletonizer: ^0.8.0
   link_preview_generator: ^1.2.0
   http: ^0.13.6
+  pull_down_button: ^0.9.3
 
 dev_dependencies:
   flutter_test:

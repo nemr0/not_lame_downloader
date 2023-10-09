@@ -50,10 +50,10 @@ class DownloadTaskUpdateState extends DownloadState {
 class TaskWithUpdates extends Equatable{
 
   final DownloadTask task;
-  final TaskStatusUpdate? statusUpdate;
-  final TaskProgressUpdate? progressUpdate;
+  final TaskStatusUpdate statusUpdate;
+  final TaskProgressUpdate progressUpdate;
 
-  const TaskWithUpdates(this.task, { this.statusUpdate, this.progressUpdate});
+  const TaskWithUpdates(this.task, { required this.statusUpdate, required this.progressUpdate});
 
   TaskWithUpdates copyWith(
       { TaskStatusUpdate? statusUpdate, TaskProgressUpdate? progressUpdate}) =>

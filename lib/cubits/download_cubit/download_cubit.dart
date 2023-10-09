@@ -4,6 +4,7 @@ import 'package:background_downloader/background_downloader.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../helpers/callbacks/notification_tap_call_back.dart';
 
@@ -16,8 +17,7 @@ class DownloadCubit extends Cubit<DownloadState> {
   static DownloadCubit get(BuildContext context) => BlocProvider.of<DownloadCubit>(context);
 
   initialize() async {
-    //TODO: Save Tasks states
-    _fileDownloader.database.deleteAllRecords();
+
     emit(DownloadLoadingState());
     _fileDownloader.resumeFromBackground();
     // configure notification for all tasks
@@ -33,7 +33,7 @@ class DownloadCubit extends Cubit<DownloadState> {
     _fileDownloader.configure(globalConfig: [
       (Config.requestTimeout, const Duration(seconds: 100)),
     ], androidConfig: [
-      (Config.useCacheDir, Config.whenAble),
+      (Config.useCacheDir, Config.never),(Config.runInForeground,Config.whenAble)
     ], iOSConfig: [
       (Config.localize, {'Cancel': 'Stop It'}),
     ]).then((result) => debugPrint('Configuration result = $result'));
@@ -132,10 +132,11 @@ class DownloadCubit extends Cubit<DownloadState> {
       taskId: id,
       allowPause: true,
       updates: Updates.statusAndProgress,
+      baseDirectory: BaseDirectory.applicationDocuments
     ).withSuggestedFilename();
     try {
       await _fileDownloader.enqueue(task);
-      tasks.add(TaskWithUpdates(task));
+      tasks.add(TaskWithUpdates(task, statusUpdate: TaskStatusUpdate(task,TaskStatus.enqueued), progressUpdate: TaskProgressUpdate(task, 0),),);
 
       /// emit success;
       log('task enqueued');
