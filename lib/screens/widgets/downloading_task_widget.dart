@@ -67,21 +67,7 @@ class DownloadTaskWidget extends HookWidget {
         progress >= 0 &&
         progress < 1;
     final bool isPaused = status == TaskStatus.paused;
-    // final bool showProgress =
-    // taskWithUpdates.statusUpdate?.exception!=null?false:
-    // (status != null)
-    //     ? (status == TaskStatus.complete)
-    //         ? false
-    //         : progress != null &&
-    //             progress != 1.0 &&
-    //             progress >= 0 &&
-    //             progress < 1
-    //     : progress != null &&
-    //     progress != 1.0 &&
-    //     progress >= 0 &&
-    //     progress < 1;
-    //
-    // final isPaused = useState(status==TaskStatus.paused);
+
     final String remainingTime =
         taskWithUpdates.progressUpdate.timeRemaining.toString().split('.').first ==
                 '-0:00:01'

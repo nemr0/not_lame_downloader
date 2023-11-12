@@ -31,10 +31,12 @@ class DownloadCubit extends Cubit<DownloadState> {
             progressBar: true);
     //configure global
     _fileDownloader.configure(globalConfig: [
-      (Config.requestTimeout, const Duration(seconds: 100)),
+      (Config.requestTimeout, const Duration(minutes: 3)),
     ], androidConfig: [
-      (Config.useCacheDir, Config.never),(Config.runInForeground,Config.whenAble)
-    ], iOSConfig: [
+      (Config.useCacheDir, Config.never),(Config.runInForeground,Config.always)
+    ], iOSConfig: [(Config.resourceTimeout, const Duration(hours: 24)),
+      (Config.requestTimeout, const Duration(minutes: 3)),
+      (Config.checkAvailableSpace,Config.always),
       (Config.localize, {'Cancel': 'Stop It'}),
     ]).then((result) => debugPrint('Configuration result = $result'));
 
@@ -58,7 +60,7 @@ class DownloadCubit extends Cubit<DownloadState> {
             // but the .await group so won't use the above config
             complete: const TaskNotification(
                 'Download {filename}', 'Download complete'),
-            tapOpensFile: true); // dog can also open directly from tap
+            tapOpensFile: false, progressBar: true); // dog can also open directly from tap
     // Listen to updates and process
     emit(DownloadInitial());
     FileDownloader().updates.listen((update) async {
@@ -160,5 +162,17 @@ class DownloadCubit extends Cubit<DownloadState> {
     catch(e){
      return false;
     }
+  }
+  Future<bool> deleteAllDownloadTasks() async {
+   try{
+     await FileDownloader().cancelTasksWithIds(tasks.map((e) => e.task.taskId).toList());
+   await FileDownloader().database.deleteAllRecords();
+    tasks=[];
+    emit(const DownloadTaskUpdateState());
+    return true;
+   }
+       catch(e){
+     return false;
+       }
   }
 }

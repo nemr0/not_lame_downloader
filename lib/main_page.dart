@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:not_lame_downloader/app_assets.dart';
 import 'package:not_lame_downloader/cubits/download_cubit/download_cubit.dart';
 import 'package:not_lame_downloader/helpers/extensions/context_extension.dart';
+import 'package:not_lame_downloader/helpers/overlays/toast.dart';
 import 'package:not_lame_downloader/screens/download_task_page.dart';
 import 'package:not_lame_downloader/screens/widgets/modal_popups/add_download_modal_popup.dart';
 import 'package:flutter/cupertino.dart';
@@ -57,22 +58,21 @@ class MainPage extends HookWidget {
                             content: const Text('Are you sure you want to delete all tasks?'),
                             actions: [
                               CupertinoDialogAction(
-                                onPressed: () =>
-                                  FileDownloader().database.deleteAllRecords().then((value) {
-                    FileDownloader().destroy(); DownloadCubit
-                        .get(context)
-                        .getDownloadedTasks()
-                        .then((value) => Navigator.of(context).pop());}),
-                                isDestructiveAction: true,
-                                child: const Text(
-                                  'Yes',
-                                )
-                              ),
+                                  onPressed: () => DownloadCubit.get(context).deleteAllDownloadTasks().then((value) {
+                                    Navigator.of(context).pop();
+                                    if(!value){
+                                      showToast(context, 'Could not delete all records');
+                                    }
+                                  }),
+                                  isDestructiveAction: true,
+                                  child: const Text(
+                                    'Yes',
+                                  )),
                               CupertinoDialogAction(
                                 child: const Text(
                                   'No',
                                 ),
-                                onPressed: () =>Navigator.of(context).pop(),
+                                onPressed: () => Navigator.of(context).pop(),
                               ),
                             ],
                           ));
